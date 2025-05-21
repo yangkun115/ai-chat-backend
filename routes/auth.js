@@ -9,6 +9,15 @@ router.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    // 验证输入
+    if (!username || !password) {
+      return res.status(400).json({ error: '用户名和密码不能为空' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: '密码长度至少为6个字符' });
+    }
+
     // 检查用户是否已存在
     const existingUser = await User.findOne({ username });
     if (existingUser) {
@@ -26,7 +35,8 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({ token });
   } catch (error) {
-    res.status(500).json({ error: '服务器错误' });
+    console.error('注册错误:', error);
+    res.status(500).json({ error: '注册失败，请稍后重试' });
   }
 });
 
@@ -34,6 +44,11 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
+
+    // 验证输入
+    if (!username || !password) {
+      return res.status(400).json({ error: '用户名和密码不能为空' });
+    }
 
     // 查找用户
     const user = await User.findOne({ username });
@@ -54,7 +69,8 @@ router.post('/login', async (req, res) => {
 
     res.json({ token });
   } catch (error) {
-    res.status(500).json({ error: '服务器错误' });
+    console.error('登录错误:', error);
+    res.status(500).json({ error: '登录失败，请稍后重试' });
   }
 });
 
@@ -62,9 +78,13 @@ router.post('/login', async (req, res) => {
 router.get('/me', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: '用户不存在' });
+    }
     res.json(user);
   } catch (error) {
-    res.status(500).json({ error: '服务器错误' });
+    console.error('获取用户信息错误:', error);
+    res.status(500).json({ error: '获取用户信息失败，请稍后重试' });
   }
 });
 
