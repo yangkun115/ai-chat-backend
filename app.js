@@ -7,11 +7,19 @@ const authRoutes = require('./routes/auth');
 const app = express();
 
 // CORS 配置
-app.use(cors({
-    origin: '*', // 允许所有来源访问
+const corsOptions = {
+    origin: true, // 允许所有来源
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+
+// 处理 OPTIONS 请求
+app.options('*', cors(corsOptions));
 
 // 中间件
 app.use(express.json({ limit: '10kb' }));
